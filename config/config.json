@@ -1,0 +1,10 @@
+{
+  "pagination": {
+    "defaultPage": 1,
+    "defaultLimit": 10
+  },
+  "auth": {
+    "sessionTimeout": 60,
+    "secret": "O^cEVhd7A!h8EA5wol%hh"
+  }
+}

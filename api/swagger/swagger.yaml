@@ -1,0 +1,412 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: 'Innovecs test app service API'
+basePath: ''
+consumes:
+- application/json
+- application/vnd.api+json
+produces:
+- application/json
+- application/vnd.api+json
+parameters:
+  Authorization:
+    name: Authorization
+    in: header
+    type: string
+    required: true
+    description: Authorization token
+  jwt:
+    name: jwt
+    in: query
+    type: string
+    required: false
+    description: Authorization jwt token
+
+paths:
+
+  ################################################################################
+  #                                 Auth                                         #
+  ################################################################################
+  /auth/signup:
+    post:
+      description: New registration
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+                - firstName
+      responses:
+        200:
+          description: Create new registration successfull
+          schema:
+            type: object
+            properties:
+              data:
+                properties:
+                  registrationId:
+                    type: integer
+        400:
+          description: User already enrolled
+          schema:
+          $ref: '#/responses/Error'
+        409:
+          description: User already enrolled
+          schema:
+          $ref: '#/responses/Error'
+
+  /auth/signin:
+    post:
+      description: Loggin into account
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+
+      responses:
+        200:
+          description: Returns jwt token
+          schema:
+            type: object
+            properties:
+              data:
+                properties:
+                  token:
+                    type: string
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+
+  ################################################################################
+  #                               User                                           #
+  ################################################################################
+
+  /users:
+    get:
+      description: Get list of users
+      parameters:
+      - $ref: '#/parameters/Authorization'
+      responses:
+        200:
+          description: List of users
+          schema:
+            type: object
+            properties:
+              data:
+                properties:
+                  dealId:
+                    type: integer
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+
+  ################################################################################
+  #                                 Deals                                        #
+  ################################################################################
+
+  /deals:
+    get:
+      description: Get list of deals
+      parameters:
+      - $ref: '#/parameters/Authorization'
+      - name: status
+        in: query
+        description: Apply filter by status
+        required: false
+        type: string
+        enum:
+        - Open
+        - Closed
+      - name: limit
+        in: query
+        description: Items per page
+        required: false
+        type: integer
+      - name: page
+        in: query
+        description: Page number
+        required: false
+        type: integer
+      - name: detail
+        in: query
+        description: Show with detail information
+        required: false
+        type: boolean
+      responses:
+        200:
+          description: Get list of deals
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Deal'
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+  /deals/create:
+    post:
+      description: Create new proposal stream
+      parameters:
+      - $ref: '#/parameters/Authorization'
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                theme:
+                  type: string
+                message:
+                  type: string
+                amount:
+                  type: number
+                  format: float
+                receiverId:
+                  type: integer
+      responses:
+        200:
+          description: Returns id of created deal
+          schema:
+            type: object
+            properties:
+              data:
+                properties:
+                  dealId:
+                    type: integer
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+  /deals/reply:
+    post:
+      description: Replay to proposal
+      parameters:
+      - $ref: '#/parameters/Authorization'
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                dealId:
+                  type: integer
+                message:
+                  type: string
+                amount:
+                  type: number
+                  format: float
+                action:
+                  type: string
+                  enum:
+                  - Accept
+                  - Reject
+                  - Request
+                receiverId:
+                  type: integer
+                  description: Looks like side effect. Resend message to another user
+      responses:
+        200:
+          description: Returns id of created deal
+          schema:
+            type: object
+            properties:
+              data:
+                properties:
+                  dealId:
+                    type: integer
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+  /deals/{id}:
+    get:
+      description: Replay to proposal
+      parameters:
+      - $ref: '#/parameters/Authorization'
+      - name: id
+        in: path
+        type: integer
+      responses:
+        200:
+          description: Returns deal by id
+          schema:
+            $ref: '#/definitions/DetailDeal'
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/responses/Error'
+        404:
+          description: User not found
+          schema:
+          $ref: '#/responses/Error'
+        401:
+          description: Unauthorized Access
+          schema:
+            $ref: '#/responses/Error'
+
+
+
+  ################################################################################
+  #                                 Swagger UI                                   #
+  ################################################################################
+  /api-docs:
+    get:
+      description: Swagger UI
+      responses:
+        "200":
+          description: Statuses of dependent resources
+
+  /api-docs/{link}:
+    get:
+      description: Self description of Swagger UI. Add here to avoiding api-docs url parsing during swagger validation.
+      parameters:
+      - name: link
+        in: path
+        required: false
+        type: string
+      responses:
+        "200":
+          description: Statuses of dependent resources
+
+################################################################################
+#                                 Definitions                                  #
+################################################################################
+
+responses:
+  Error:
+    type: object
+    properties:
+      error:
+        properties:
+          status:
+            type: integer
+          message:
+            type: string
+
+definitions:
+  Deal:
+    type: object
+    properties:
+      theme:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
+
+  DetailDeal:
+    type: object
+    properties:
+      theme:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/Message'
+
+  Message:
+    type: object
+    properties:
+      message:
+        type: string
+      id:
+        type: integer
+      action:
+        type: string
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
+

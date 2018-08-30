@@ -1,0 +1,32 @@
+{
+  "name": "innovecs_app",
+  "version": "1.0.0",
+  "description": "home test for backend",
+  "main": "index.js",
+  "scripts": {
+    "migration": "./node_modules/.bin/sequelize db:migrate",
+    "migration:undo": "./node_modules/.bin/sequelize db:migrate:undo",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "nconf": "^0.10.0",
+    "pg": "^7.4.3",
+    "sequelize": "^4.38.0",
+    "sequelize-cli": "^4.1.1",
+    "swagger-express-middleware": "^1.0.0-alpha.12",
+    "swagger-express-validator": "^0.1.0",
+    "swagger-ui-express": "^4.0.0",
+    "util.promisify": "^1.0.0",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0"
+  }
+}

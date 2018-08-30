@@ -1,0 +1,29 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "strict": 1,
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "classes": true
+      }
+    ],
+    "new-cap": 0,
+    "no-underscore-dangle": 0,
+    "import/no-cycle": 0,
+    "arrow-body-style": 0,
+    "func-names": 0,
+    "eol-last": 1,
+    "no-param-reassign": 0,
+    "no-undef": 0,
+    "class-methods-use-this": 0,
+    "max-len": ["error", 120],
+    "comma-dangle": 0
+  },
+  "extends": "airbnb/base",
+  "globals": {}
+}
