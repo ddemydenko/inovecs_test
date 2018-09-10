@@ -4,14 +4,16 @@ services:
     build: .
     ports:
     - 3000:3000
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; npm start'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; npm run migration; npm run start'
     depends_on:
     - db
     environment:
-    - DATABASE_URL=postgres://postgres:password@db:5432/postgres
-    - PORT=3000
+    - DATABASE_URL=postgres://postgres:555666@db:5432/postgres
+    - PORT=5432
   db:
     image: postgres
+    ports:
+    - 5432:5432
     environment:
     - POSTGRES_USER=postgres
     - POSTGRES_PASSWORD=555666
