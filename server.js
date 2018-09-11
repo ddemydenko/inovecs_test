@@ -9,7 +9,8 @@ const {
   setupSwaggerUi, preventShowStackTrace, swaggerDocument, authCheck
 } = require('./services/Middlware');
 
-const PORT = 3000;
+const PORT = process.env.NODE_PORT || 3000;
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -29,7 +30,10 @@ middleware(swaggerDocument, app, (error, middleWare) => {
 
 
   app.use((err, req, res, next) => {
-    console.error(err.stack);
+    //todo use this logger like winston or similar
+    if(process.env.NODE_ENV === 'development'){
+      console.error(err.stack);
+    }
     err.status = err.status || 500;
     res.status(err.status);
     res.send({
@@ -49,3 +53,5 @@ app.listen(PORT, (err) => {
   }
   console.log('Server is running on Port', PORT);
 });
+
+module.exports = app;

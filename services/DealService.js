@@ -103,17 +103,29 @@ class DealService {
     return Deal.findOne({
       attributes: ['id', 'theme', 'replyTo', 'status', 'receiverId', 'authorId', 'createdAt', 'updatedAt'],
       where: { id },
-      include: [{
-        model: Message,
-        as: 'messages',
-        attributes: ['message', 'authorId', 'action', 'createdAt']
-      }]
+      include: [
+        {
+          model: Message,
+          as: 'messages',
+          attributes: ['id', 'message', 'authorId', 'action', 'createdAt'],
+          include: [{
+            model: User,
+            as: 'author',
+            attributes: ['id', 'firstName', 'lastName']
+          }]
+        },
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'firstName', 'lastName']
+        }
+      ]
     }).then((deal) => {
       if (!deal) {
         throw new CustomError('Deal not found', 404);
       }
       if (![deal.authorId, deal.receiverId].includes(req.authUser.id)) {
-        throw new CustomError('You can\'t see this deal', 401);
+        throw new CustomError("You can't see this deal", 401);
       }
 
       return deal;
@@ -146,31 +158,36 @@ class DealService {
     const include = [{
       model: User,
       as: 'author',
-      attributes: ['firstName', 'lastName']
+      attributes: ['id', 'firstName', 'lastName']
     }];
     if (detail) {
       include.push({
         model: Message,
         as: 'messages',
-        attributes: ['message', 'authorId', 'action', 'createdAt']
+        attributes: ['id', 'message', 'action', 'createdAt'],
+        include: [{
+          model: User,
+          as: 'author',
+          attributes: ['id', 'firstName', 'lastName']
+        }]
       });
     }
 
-    return Deal.findAll({
-      attributes: ['id', 'theme', 'status', 'createdAt', 'updatedAt'],
-      where,
-      include,
-      offset,
-      limit
-    })
-      .then((deals) => {
-        if (!deals.length) {
-          throw new CustomError('No one deals are created', 404);
-        }
-        return deals;
-      });
+      return Deal.findAll({
+        attributes: ['id', 'authorId', 'theme', 'status', 'createdAt', 'updatedAt'],
+        where,
+        include,
+        offset,
+        limit
+      })
+        .then((deals) => {
+          if (!deals.length) {
+            throw new CustomError('No one deals are created', 404);
+          }
+          return deals;
+        });
+    }
   }
-}
 
 
-module.exports = new DealService();
+  module.exports = new DealService();

@@ -7,7 +7,7 @@ class UserService {
       attributes: ['id', 'email', 'firstName', 'lastName']
     })
       .then((users) => {
-        if (!users) {
+        if (!users.length) {
           throw new CustomError('No one users are registered', 404);
         } else {
           return users;
