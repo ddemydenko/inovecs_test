@@ -9,7 +9,7 @@ describe('/users', () => {
   before(() => {
     app = require('../../server');
     startTime = new Date();
-    return destroyUsers().then(destroyDeals).then(createUsers);
+    return destroyUsers().then(createUsers);
   });
 
   after(() => {
@@ -17,7 +17,7 @@ describe('/users', () => {
   });
 
   context('/users', () => {
-    it('should create deal with correct data', () => {
+    it('should return users with correct data', () => {
       return chai.request(app)
         .get('/users')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
@@ -31,6 +31,37 @@ describe('/users', () => {
           user.should.have.property('lastName').to.be.a('string');
 
           return res.should.have.status(200);
+        })
+    });
+
+    it('should throw Error when no one users are registered', () => {
+      return destroyUsers()
+        .then(() => chai.request(app)
+          .get('/users')
+          .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
+        )
+        .then((res) => {
+          res.body.should.have.property('error').eql({
+            status: 404,
+            message: "No one users are registered"
+          });
+
+          return res.should.have.status(404);
+        });
+
+
+    });
+
+    it('should throw Error when try to access with expired token', () => {
+      return chai.request(app)
+        .get('/users')
+        .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE1MzY3MDIxMjc1NzYsImlhdCI6MTUzNjcwMjA2N30.jhCAk6aRdclbmTyPUmXkAZOC2WgAjM6xJtI6bPf4xnQ')
+        .then((res) => {
+          res.body.should.have.property('error').eql({
+            status: 401,
+            message: "Session expired"
+          });
+          return res.should.have.status(401);
         })
     });
 

@@ -269,6 +269,20 @@ describe('/deals', () => {
         })
     });
 
+    it("should throw Error when user try access to not exists deal", () => {
+      return chai.request(app)
+        .get('/deals/999999999')
+        .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
+        .then((res) => {
+          res.body.should.have.property('error').eql({
+            status: 404,
+            message: "Deal not found"
+          });
+
+          return res.should.have.status(404);
+        })
+    });
+
     it("should return correct detailed deals objects", () => {
       return chai.request(app)
         .get('/deals')

@@ -20,15 +20,11 @@ describe('Deal Service', () => {
       createDeal = sinon.spy(Deal, 'create');
       createMessage = sinon.spy(Message, 'create');
       DealService = proxyquire('../../services/DealService', { Deal: createDeal, createMessage: Message });
-      return destroyUsers()
-        .then(() => {
-          return createUsers();
-      });
+      return destroyUsers().then(createUsers);
     });
 
     after(() => {
       createDeal.restore();
-      return destroyUsers();
     });
 
     it('methods create deal and create message should only call once', () => {
