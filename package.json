@@ -6,7 +6,10 @@
   "scripts": {
     "migration": "./node_modules/.bin/sequelize db:migrate",
     "migration:undo": "./node_modules/.bin/sequelize db:migrate:undo",
-    "test": "set NODE_ENV=test&&mocha --timeout 10000 --exit",
+    "test:unit": "set NODE_ENV=test&&nyc mocha --timeout 10000 --exit --recursive test/unit",
+    "test:integration": "set NODE_PORT=3001&&set NODE_ENV=test&&nyc mocha --timeout 10000 --exit --recursive test/integrations",
+    "test": "set NODE_PORT=3001&&set NODE_ENV=test&&nyc mocha",
+    "cover": "set NODE_PORT=3001&&set NODE_ENV=test&&mocha&&nyc report --reporter=html",
     "start": "node server.js"
   },
   "author": "",
@@ -29,6 +32,7 @@
   "devDependencies": {
     "ajv": "^6.5.3",
     "chai": "^4.1.2",
+    "chai-http": "^4.2.0",
     "eslint": "^5.4.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
