@@ -2,14 +2,15 @@ const sinon = require("sinon");
 const chai = require("chai");
 chai.should();
 chai.use(require('sinon-chai'));
-const expect = chai.expect;
 
 const proxyquire = require('proxyquire');
 const bcrypt = require('bcrypt');
 const { promisify } = require('util');
 const cryptCompare = promisify(bcrypt.compare);
 const { User } = require('../../models');
-const { destroyUsers } = require('../helpers');
+const { destroyUsers, createUsers } = require('../helpers');
+const CustomError = require('../../services/CustomError');
+
 
 describe('Auth Service', () => {
   context('Sign Up', () => {
@@ -35,7 +36,6 @@ describe('Auth Service', () => {
 
     after(() => {
       createUser.restore();
-      // return destroyUsers();
     });
 
     it('should only call the create method once with correct arguments', () => {
@@ -71,9 +71,57 @@ describe('Auth Service', () => {
         });
     });
   });
+
+  context('Sign In', () => {
+    let findUser;
+    let AuthService;
+
+    before(() => {
+      const req = {
+        body: {
+          data: {
+            email: 'bruce.wayne@example.com',
+            password: '12345'
+          }
+        }
+      };
+      findUser = sinon.spy(User, 'findOne');
+      AuthService = proxyquire('../../services/AuthService', { User: findUser });
+      return destroyUsers().then(createUsers).then(() => AuthService.signin(req));
+
+    });
+
+    after(() => {
+      findUser.restore();
+    });
+
+    it('should only call the findOne method once with correct arguments', () => {
+      findUser.should.have.been.calledOnce
+        .and.been.calledWith(
+        sinon.match({
+          attributes: ['id', 'password', 'email', 'firstName'],
+          where: { email: 'bruce.wayne@example.com' }
+        }));
+    });
+
+    it('should properly get from database', () => {
+      return findUser.returnValues[0]
+        .then((data) => {
+          const user = data.get();
+          user.should.eql({
+            id: 1,
+            password: '$2b$10$H54IcGd9tp/.B8mCdZc83O9V8rQctjK2u5k4TTDufGWigNf.86rbu',
+            firstName: 'Bruce',
+            email: 'bruce.wayne@example.com',
+          });
+
+          return Promise.resolve();
+        })
+    });
+  });
+
   context('Email validation', () => {
     const { isEmail } = require('../../services/Utils');
-    const CustomError = require('../../services/CustomError');
     const isEmailSpy = sinon.spy(isEmail);
 
     it('should passing check with valid email', (done) => {
