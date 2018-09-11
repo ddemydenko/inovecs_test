@@ -2,7 +2,6 @@
 const chai = require("chai");
 chai.should();
 chai.use(require('chai-http'));
-const baseURL = 'http://localhost:3000/';
 const { destroyUsers, destroyDeals, createUsers, createDeals } = require('../helpers');
 
 describe('/deals', () => {
