@@ -3,7 +3,7 @@ const chai = require("chai");
 chai.should();
 chai.use(require('chai-http'));
 const baseURL = 'http://localhost:3000/';
-const { destroyUsers, destroyDeals, createUsers } = require('../helpers');
+const { destroyUsers, destroyDeals, createUsers, createDeals } = require('../helpers');
 
 describe('/deals', () => {
   let app;
@@ -86,7 +86,7 @@ describe('/deals', () => {
         .then((res) => {
           const { body } = res;
           body.should.have.property('id').satisfy(Number.isInteger);
-          body.should.have.property('authorId', 1);
+          // body.should.have.property('authorId', 1);
           body.should.have.property('receiverId', 2);
           body.should.have.property('status', 'Open');
           body.should.have.property('replyTo', 1);
@@ -115,7 +115,7 @@ describe('/deals', () => {
         .then((res) => {
           const { body } = res;
           body.should.have.property('id').satisfy(Number.isInteger);
-          body.should.have.property('authorId', 1);
+          // body.should.have.property('authorId', 1);
           body.should.have.property('receiverId', 2);
           body.should.have.property('status', 'Closed');
           body.should.have.property('replyTo', 2);
@@ -196,10 +196,17 @@ describe('/deals', () => {
   });
 
   context('/deals', () => {
+
+    before(() => {
+      app = require('../../server');
+      startTime = new Date();
+      return destroyDeals().then(createDeals);
+    });
+
+
     it("should return correct deals objects", () => {
       return chai.request(app)
         .get('/deals')
-        .query({ status: 'Closed' })
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
         .then((res) => {
           const { body } = res;
@@ -214,6 +221,83 @@ describe('/deals', () => {
           deal.should.have.property('status').to.be.oneOf(['Closed', 'Open']);
           deal.should.have.property('createdAt');
           (new Date(deal.createdAt)).should.gt(startTime);
+
+          return res.should.have.status(200);
+        })
+    });
+
+    it("should return correct single deal object", () => {
+      return chai.request(app)
+        .get('/deals/1')
+        .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
+        .then((res) => {
+          const { body } = res;
+
+          body.should.have.property('id').satisfy(Number.isInteger);
+          body.should.have.property('author').an('object');
+          body.author.should.have.property('firstName').to.be.a('string');
+          body.author.should.have.property('lastName').to.be.a('string');
+          body.should.have.property('theme').to.be.a('string');
+          body.should.have.property('status').to.be.oneOf(['Closed', 'Open']);
+          body.should.have.property('createdAt');
+          (new Date(body.createdAt)).should.gt(startTime);
+
+          body.messages.should.be.an('array');
+          const message = body.messages.shift();
+
+          message.should.have.property('id').satisfy(Number.isInteger);
+          message.should.have.property('author').an('object');
+          message.author.should.have.property('firstName').to.be.a('string');
+          message.author.should.have.property('lastName').to.be.a('string');
+          message.should.have.property('createdAt');
+          (new Date(message.createdAt)).should.gt(startTime);
+
+          return res.should.have.status(200);
+        })
+    });
+
+    it("should throw Error when user try access to foreign deal", () => {
+      return chai.request(app)
+        .get('/deals/2')
+        .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
+        .then((res) => {
+          res.body.should.have.property('error').eql({
+            status: 401,
+            message: "You can't see this deal"
+          });
+
+          return res.should.have.status(401);
+        })
+    });
+
+    it("should return correct detailed deals objects", () => {
+      return chai.request(app)
+        .get('/deals')
+        .query({ detail: true })
+        .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
+        .then((res) => {
+          const { body } = res;
+          body.should.be.an('array');
+          const deal = body.shift();
+
+          deal.should.have.property('id').satisfy(Number.isInteger);
+          deal.should.have.property('author').an('object');
+          deal.author.should.have.property('firstName').to.be.a('string');
+          deal.author.should.have.property('lastName').to.be.a('string');
+          deal.should.have.property('theme').to.be.a('string');
+          deal.should.have.property('status').to.be.oneOf(['Closed', 'Open']);
+          deal.should.have.property('createdAt');
+          (new Date(deal.createdAt)).should.gt(startTime);
+
+          deal.messages.should.be.an('array');
+          const message = deal.messages.shift();
+
+          message.should.have.property('id').satisfy(Number.isInteger);
+          message.should.have.property('author').an('object');
+          message.author.should.have.property('firstName').to.be.a('string');
+          message.author.should.have.property('lastName').to.be.a('string');
+          message.should.have.property('createdAt');
+          (new Date(message.createdAt)).should.gt(startTime);
 
           return res.should.have.status(200);
         })
