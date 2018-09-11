@@ -277,14 +277,9 @@ paths:
                   description: Looks like side effect. Resend message to another user
       responses:
         200:
-          description: Returns id of created deal
+          description: Returns data of updated deal
           schema:
-            type: object
-            properties:
-              data:
-                properties:
-                  dealId:
-                    type: integer
+            $ref: '#/definitions/Deal'
         400:
           description: Validation error
           schema:
@@ -371,6 +366,13 @@ definitions:
         type: string
       id:
         type: integer
+      author:
+        type: object
+        properties:
+          firstName:
+            type: string
+          lastName:
+            type: string
       status:
         type: string
       createdAt:
@@ -385,6 +387,13 @@ definitions:
         type: string
       id:
         type: integer
+      author:
+        type: object
+        properties:
+          firstName:
+            type: string
+          lastName:
+            type: string
       status:
         type: string
       createdAt:
@@ -403,6 +412,13 @@ definitions:
         type: string
       id:
         type: integer
+      author:
+        type: object
+        properties:
+          firstName:
+            type: string
+          lastName:
+            type: string
       action:
         type: string
       createdAt:
