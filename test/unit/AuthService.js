@@ -2,6 +2,7 @@ const sinon = require("sinon");
 const chai = require("chai");
 chai.should();
 chai.use(require('sinon-chai'));
+const expect = chai.expect;
 
 const proxyquire = require('proxyquire');
 const bcrypt = require('bcrypt');
@@ -68,6 +69,20 @@ describe('Auth Service', () => {
           check.should.be.true;
           return Promise.resolve();
         });
+    });
+  });
+  context('Email validation', () => {
+    const { isEmail } = require('../../services/Utils');
+    const CustomError = require('../../services/CustomError');
+    const isEmailSpy = sinon.spy(isEmail);
+
+    it('should passing check with valid email', (done) => {
+      isEmail('bruce.wayne@example.com');
+      done();
+    });
+
+    it('should throw CustomError with invalid email', () => {
+      isEmailSpy.should.to.throw(CustomError, 'Invalid email');
     });
   });
 });
