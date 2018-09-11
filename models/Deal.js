@@ -45,7 +45,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: 'deals',
+      underscore: false,
     });
+  Deal.associate = ({ User }) => {
+    Deal.belongsTo(User, { foreignKey: 'authorId', as: 'author', targetKey: 'id' });
+  };
+
+
 
   return Deal;
 };

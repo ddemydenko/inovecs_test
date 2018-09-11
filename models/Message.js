@@ -43,13 +43,11 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'messages',
     });
   Message.associate = ({ Deal, User }) => {
+    Message.belongsTo(User, { foreignKey: 'authorId', as: 'author', targetKey: 'id' });
+
     Deal.hasMany(Message, {
       foreignKey: 'dealId',
       as: 'messages',
-    });
-    User.hasMany(Message, {
-      foreignKey: 'authorId',
-      as: 'authors',
     });
   };
 
