@@ -2,7 +2,7 @@ const path = require('path');
 
 const configPath = path.join(process.cwd(), './config/config.json');
 const nconf = require('nconf').argv().env().file({ file: configPath });
-const { Deal, sequelize, Message } = require('../models');
+const { Deal, sequelize, Message, User } = require('../models');
 const CustomError = require('../services/CustomError');
 
 const DEAL_STATUSES = {
@@ -91,7 +91,8 @@ class DealService {
         if ([DEAL_ACTIONS.REJECT, DEAL_ACTIONS.ACCEPT].includes(action)) {
           dealData.status = DEAL_STATUSES.CLOSED;
         }
-        return Deal.update(dealData, { where: { id: dealId }, returning: true });
+        return Deal.update(dealData, { where: { id: dealId }, returning: true })
+          .then(([count, rows]) => rows[0]);
       });
   }
 
@@ -142,7 +143,11 @@ class DealService {
       where.status = status;
     }
 
-    const include = [];
+    const include = [{
+      model: User,
+      as: 'author',
+      attributes: ['firstName', 'lastName']
+    }];
     if (detail) {
       include.push({
         model: Message,
