@@ -31,7 +31,7 @@ middleware(swaggerDocument, app, (error, middleWare) => {
 
 
   app.use((err, req, res, next) => {
-    if(config.logging){
+    if (config.logging) {
       console.error(err.stack);
     }
     err.status = err.status || 500;

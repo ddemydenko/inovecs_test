@@ -2,7 +2,9 @@ const path = require('path');
 
 const configPath = path.join(process.cwd(), './config/config.json');
 const nconf = require('nconf').argv().env().file({ file: configPath });
-const { Deal, sequelize, Message, User } = require('../models');
+const {
+  Deal, Message, User, sequelize
+} = require('../models');
 const CustomError = require('../services/CustomError');
 
 const DEAL_STATUSES = {
@@ -173,21 +175,20 @@ class DealService {
       });
     }
 
-      return Deal.findAll({
-        attributes: ['id', 'authorId', 'theme', 'status', 'createdAt', 'updatedAt'],
-        where,
-        include,
-        offset,
-        limit
-      })
-        .then((deals) => {
-          if (!deals.length) {
-            throw new CustomError('No one deals are created', 404);
-          }
-          return deals;
-        });
-    }
+    return Deal.findAll({
+      attributes: ['id', 'authorId', 'theme', 'status', 'createdAt', 'updatedAt'],
+      where,
+      include,
+      offset,
+      limit
+    })
+      .then((deals) => {
+        if (!deals.length) {
+          throw new CustomError('No one deals are created', 404);
+        }
+        return deals;
+      });
   }
+}
 
-
-  module.exports = new DealService();
+module.exports = new DealService();
