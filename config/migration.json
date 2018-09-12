@@ -4,11 +4,13 @@
     "password": 555666,
     "database": "postgres",
     "host": "localhost",
-    "port": 5432,
-    "dialect": "postgres"
+    "port": 54321,
+    "dialect": "postgres",
+    "logging": true
   },
   "development_docker": {
-    "use_env_variable": "DATABASE_URL"
+    "use_env_variable": "DATABASE_URL",
+    "logging": true
   },
   "test_docker": {
     "use_env_variable": "DATABASE_URL",
@@ -24,6 +26,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "DATABASE_URL"
+    "use_env_variable": "DATABASE_URL",
+    "logging": false
   }
 }

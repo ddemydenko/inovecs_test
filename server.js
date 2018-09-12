@@ -1,3 +1,5 @@
+const PORT = process.env.NODE_PORT || 3000;
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 const express = require('express');
 
 const app = express();
@@ -8,9 +10,8 @@ const { appRouter } = require('./routes');
 const {
   setupSwaggerUi, preventShowStackTrace, swaggerDocument, authCheck
 } = require('./services/Middlware');
+const config = require('./config/migration.json')[process.env.NODE_ENV];
 
-const PORT = process.env.NODE_PORT || 3000;
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -30,8 +31,7 @@ middleware(swaggerDocument, app, (error, middleWare) => {
 
 
   app.use((err, req, res, next) => {
-    //todo use this logger like winston or similar
-    if(process.env.NODE_ENV === 'development'){
+    if(config.logging){
       console.error(err.stack);
     }
     err.status = err.status || 500;
