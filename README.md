@@ -1,7 +1,7 @@
-Run new instance for postgres app
-```docker run --name postgres_clear -p 54321:5432 -e POSTGRES_PASSWORD=555666 -d postgres```
+To start application run command:
+```docker-compose -f docker-compose.yml up -d```
 
-Run application 
-```npm run start```
+Then navigate to http://localhost:3000/api-docs/ to see Swagger GUI page with api description.
 
-Swagger GUI http://localhost:3000/api-docs/
+To run mocha test execute following command
+```docker-compose -f docker-compose.yml -f docker-compose.test.yml up```
