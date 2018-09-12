@@ -91,7 +91,6 @@ describe('Auth Service', () => {
       findUser = sinon.spy(User, 'findOne');
       AuthService = proxyquire('../../services/AuthService', { User: findUser });
       return destroyUsers().then(createUsers).then(() => AuthService.signin(req));
-
     });
 
     after(() => {

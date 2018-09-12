@@ -1,18 +1,20 @@
-const { User, Deal, Message, sequelize } = require('../models');
+const {
+  User, Deal, Message, sequelize
+} = require('../models');
 
 module.exports = {
   destroyUsers() {
     return User.destroy({
       truncate: true, cascade: true
     }).then(() => {
-      return sequelize.query('ALTER SEQUENCE users_id_seq RESTART WITH 1')
+      return sequelize.query('ALTER SEQUENCE users_id_seq RESTART WITH 1');
     });
   },
   destroyDeals() {
     return Deal.destroy({
       truncate: true, cascade: true
     }).then(() => {
-      return sequelize.query('ALTER SEQUENCE deals_id_seq RESTART WITH 1')
+      return sequelize.query('ALTER SEQUENCE deals_id_seq RESTART WITH 1');
     });
   },
   createUsers() {
@@ -45,9 +47,9 @@ module.exports = {
       {
         id: 1,
         authorId: 1,
-        theme: "CD Reader",
-        status: "Open",
-        message: "Hi! I have a CD reader for you at discounted price",
+        theme: 'CD Reader',
+        status: 'Open',
+        message: 'Hi! I have a CD reader for you at discounted price',
         amount: 5.5,
         receiverId: 2,
         replyTo: 2
@@ -55,9 +57,9 @@ module.exports = {
       {
         id: 2,
         authorId: 3,
-        theme: "CD Reader",
-        status: "Open",
-        message: "Hi! I have a CD reader for you at discounted price",
+        theme: 'CD Reader',
+        status: 'Open',
+        message: 'Hi! I have a CD reader for you at discounted price',
         amount: 5.5,
         receiverId: 2,
         replyTo: 2
@@ -68,19 +70,15 @@ module.exports = {
           message: 'Hi! I have a CD reader for you at discounted price',
           authorId: 1,
           amount: 5.5,
-          dealId:1
-      },
+          dealId: 1
+        },
         {
           message: 'Hi! I have a CD reader for you at discounted price',
           authorId: 3,
           amount: 5.5,
-          dealId:2
+          dealId: 2
         }
       ]);
     });
   }
-
-
-
-
-}
+};

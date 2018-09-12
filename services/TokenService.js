@@ -17,11 +17,9 @@ class TokenService {
     this.auth = auth;
   }
 
-  encodeToken(data) {
+  async encodeToken(data) {
     const tokenData = Object.assign({}, data, { expirationDate: this.getExpirationDate() });
-    const token = jwt.sign(tokenData, this.auth.secret);
-
-    return Promise.resolve(token);
+    await jwt.sign(tokenData, this.auth.secret);
   }
 
   decodeToken(token) {
