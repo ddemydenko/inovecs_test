@@ -22,9 +22,9 @@ class DealService {
   /**
    * @param req.authUser decoded token from mw
    * @desc create new Deal with first message
-   * @returns {*}
+   * @returns {Object} {@link Deal}
    */
-  create(req) {
+  async create(req) {
     const {
       receiverId, theme, amount, message
     } = req.body.data;
@@ -32,77 +32,74 @@ class DealService {
     if (req.authUser.id === receiverId) {
       throw new CustomError('You can\'t send message to yourself', 400);
     }
-    let dealData;
-    return sequelize.transaction((t) => {
-      return Deal.create({
+
+    return sequelize.transaction(async (t) => {
+      const deal = await Deal.create({
         authorId: req.authUser.id,
         theme,
         receiverId,
         status: DEAL_STATUSES.OPEN,
         replyTo: receiverId
-      }, { transaction: t })
-        .then((deal) => {
-          dealData = deal;
-          return Message.create({
-            message,
-            authorId: req.authUser.id,
-            amount,
-            action: DEAL_ACTIONS.REQUEST,
-            dealId: deal.id
-          }, { transaction: t });
-        }).then(() => dealData);
+      }, { transaction: t });
+
+      await Message.create({
+        message,
+        authorId: req.authUser.id,
+        amount,
+        action: DEAL_ACTIONS.REQUEST,
+        dealId: deal.id
+      }, { transaction: t });
+
+      return deal;
     });
   }
 
 
-  reply(req) {
+  async reply(req) {
     const {
       action, amount, message, dealId
     } = req.body.data;
 
-    let replyTo;
-
-    return Deal.findOne({
+    const deal = await Deal.findOne({
       attributes: ['id', 'theme', 'replyTo', 'status', 'authorId', 'receiverId', 'createdAt', 'updatedAt'],
       where: { id: dealId },
-    })
-      .then((deal) => {
-        if (!deal) {
-          throw new CustomError('Deal not found', 404);
-        }
-        if (deal.replyTo !== req.authUser.id) {
-          throw new CustomError('Reply can only receiver', 400);
-        }
-        if (deal.status === DEAL_STATUSES.CLOSED) {
-          throw new CustomError('You can\'t reply for closed deal', 400);
-        }
-        replyTo = req.authUser.id === deal.authorId ? deal.receiverId : deal.authorId;
+    });
 
-        return Message.create({
-          message,
-          authorId: req.authUser.id,
-          amount,
-          action,
-          dealId: deal.id
-        });
-      })
-      .then(() => {
-        const dealData = {
-          replyTo
-        };
-        if ([DEAL_ACTIONS.REJECT, DEAL_ACTIONS.ACCEPT].includes(action)) {
-          dealData.status = DEAL_STATUSES.CLOSED;
-        }
-        return Deal.update(dealData, { where: { id: dealId }, returning: true })
-          .then(([count, rows]) => rows[0]);
-      });
+    if (!deal) {
+      throw new CustomError('Deal not found', 404);
+    }
+    if (deal.replyTo !== req.authUser.id) {
+      throw new CustomError('Reply can only receiver', 400);
+    }
+    if (deal.status === DEAL_STATUSES.CLOSED) {
+      throw new CustomError('You can\'t reply for closed deal', 400);
+    }
+    const replyTo = req.authUser.id === deal.authorId ? deal.receiverId : deal.authorId;
+
+    await Message.create({
+      message,
+      authorId: req.authUser.id,
+      amount,
+      action,
+      dealId: deal.id
+    });
+
+    const dealData = { replyTo };
+
+    if ([DEAL_ACTIONS.REJECT, DEAL_ACTIONS.ACCEPT].includes(action)) {
+      dealData.status = DEAL_STATUSES.CLOSED;
+    }
+
+    return Deal.update(dealData, { where: { id: dealId }, returning: true })
+      .then(([count, rows]) => rows[0]);
   }
 
-  get(req) {
+  async get(req) {
     const {
       id
     } = req.params;
-    return Deal.findOne({
+
+    const deal = await Deal.findOne({
       attributes: ['id', 'theme', 'replyTo', 'status', 'receiverId', 'authorId', 'createdAt', 'updatedAt'],
       where: { id },
       include: [
@@ -122,25 +119,25 @@ class DealService {
           attributes: ['id', 'firstName', 'lastName']
         }
       ]
-    }).then((deal) => {
-      if (!deal) {
-        throw new CustomError('Deal not found', 404);
-      }
-      if (![deal.authorId, deal.receiverId].includes(req.authUser.id)) {
-        throw new CustomError("You can't see this deal", 401);
-      }
-
-      return deal;
     });
+
+    if (!deal) {
+      throw new CustomError('Deal not found', 404);
+    }
+    if (![deal.authorId, deal.receiverId].includes(req.authUser.id)) {
+      throw new CustomError("You can't see this deal", 401);
+    }
+
+    return deal;
   }
 
 
   /**
    * @param req.authUser decoded token from mw
    * @desc gets only own deals, applies filter by creator
-   * @returns {*}
+   * @returns {Deal[]}
    */
-  list(req) {
+  async list(req) {
     const {
       status,
       page = 1,
@@ -175,19 +172,18 @@ class DealService {
       });
     }
 
-    return Deal.findAll({
+    const deals = await Deal.findAll({
       attributes: ['id', 'authorId', 'theme', 'status', 'createdAt', 'updatedAt'],
       where,
       include,
       offset,
       limit
-    })
-      .then((deals) => {
-        if (!deals.length) {
-          throw new CustomError('No one deals are created', 404);
-        }
-        return deals;
-      });
+    });
+
+    if (!deals.length) {
+      throw new CustomError('No one deals are created', 404);
+    }
+    return deals;
   }
 }
 

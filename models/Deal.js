@@ -51,7 +51,5 @@ module.exports = (sequelize, DataTypes) => {
     Deal.belongsTo(User, { foreignKey: 'authorId', as: 'author', targetKey: 'id' });
   };
 
-
-
   return Deal;
 };
