@@ -1,14 +1,12 @@
-const chai = require("chai");
+const chai = require('chai');
+
 chai.should();
 chai.use(require('chai-http'));
-const { destroyUsers, destroyDeals, createUsers, createDeals } = require('../helpers');
+const { destroyUsers, createUsers } = require('../helpers');
+const app = require('../../server');
 
 describe('/users', () => {
-  let app;
-  let startTime;
   before(() => {
-    app = require('../../server');
-    startTime = new Date();
     return destroyUsers().then(createUsers);
   });
 
@@ -31,25 +29,22 @@ describe('/users', () => {
           user.should.have.property('lastName').to.be.a('string');
 
           return res.should.have.status(200);
-        })
+        });
     });
 
     it('should throw Error when no one users are registered', () => {
       return destroyUsers()
         .then(() => chai.request(app)
           .get('/users')
-          .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
-        )
+          .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU'))
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 404,
-            message: "No one users are registered"
+            message: 'No one users are registered'
           });
 
           return res.should.have.status(404);
         });
-
-
     });
 
     it('should throw Error when try to access with expired token', () => {
@@ -59,12 +54,10 @@ describe('/users', () => {
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 401,
-            message: "Session expired"
+            message: 'Session expired'
           });
           return res.should.have.status(401);
-        })
+        });
     });
-
   });
-
-})
+});

@@ -1,14 +1,17 @@
-// return;
-const chai = require("chai");
+const chai = require('chai');
+
 chai.should();
 chai.use(require('chai-http'));
-const { destroyUsers, destroyDeals, createUsers, createDeals } = require('../helpers');
+const {
+  destroyUsers, destroyDeals, createUsers, createDeals
+} = require('../helpers');
+
+const app = require('../../server');
+
 
 describe('/deals', () => {
-  let app;
   let startTime;
   before(() => {
-    app = require('../../server');
     startTime = new Date();
     return destroyUsers().then(destroyDeals).then(createUsers);
   });
@@ -22,12 +25,14 @@ describe('/deals', () => {
       return chai.request(app)
         .post('/deals/create')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
-        .send({ data: {
-            theme: "CD Reader",
-            message: "Hi! I have a CD reader for you at discounted price",
+        .send({
+          data: {
+            theme: 'CD Reader',
+            message: 'Hi! I have a CD reader for you at discounted price',
             amount: 5.5,
             receiverId: 2
-        } })
+          }
+        })
         .then((res) => {
           const { body } = res;
           body.should.have.property('id').satisfy(Number.isInteger);
@@ -43,19 +48,21 @@ describe('/deals', () => {
           body.should.have.property('deletedAt').to.be.null;
 
           return res.should.have.status(200);
-        })
+        });
     });
 
     it('should throw Error when try to create deal with yourself', () => {
       return chai.request(app)
         .post('/deals/create')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
-        .send({ data: {
-            theme: "CD Reader",
-            message: "Hi! I have a CD reader for you at discounted price",
+        .send({
+          data: {
+            theme: 'CD Reader',
+            message: 'Hi! I have a CD reader for you at discounted price',
             amount: 0,
             receiverId: 1
-          } })
+          }
+        })
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 400,
@@ -63,29 +70,26 @@ describe('/deals', () => {
           });
 
           return res.should.have.status(400);
-        })
+        });
     });
-
-
-
-
   });
 
   context('/reply', () => {
-    it("should create message and not to change status of deal when user have not provided status", () => {
+    it('should create message and not to change status of deal when user have not provided status', () => {
       return chai.request(app)
         .post('/deals/reply')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJjbGFyay5rZW50QGV4YW1wbGUuY29tIiwiZmlyc3ROYW1lIjoiQ2xhcmsiLCJleHBpcmF0aW9uRGF0ZSI6MTU3MjY3ODQxODg5NywiaWF0IjoxNTM2Njc0ODE4fQ.hbT7AilTZU09QdSTXqdadfxod-YkM_Z6sTvyVuDhvY0')
-        .send({ data: {
+        .send({
+          data: {
             dealId: 1,
-            message: "Test message for reply without status",
+            message: 'Test message for reply without status',
             amount: 5.5,
             receiverId: 2
-          } })
+          }
+        })
         .then((res) => {
           const { body } = res;
           body.should.have.property('id').satisfy(Number.isInteger);
-          // body.should.have.property('authorId', 1);
           body.should.have.property('receiverId', 2);
           body.should.have.property('status', 'Open');
           body.should.have.property('replyTo', 1);
@@ -96,7 +100,7 @@ describe('/deals', () => {
           body.should.have.property('deletedAt').to.be.null;
 
           return res.should.have.status(200);
-        })
+        });
     });
 
 
@@ -104,17 +108,18 @@ describe('/deals', () => {
       return chai.request(app)
         .post('/deals/reply')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
-        .send({ data: {
+        .send({
+          data: {
             dealId: 1,
-            action: "Accept",
-            message: "Test message for reply with accept",
+            action: 'Accept',
+            message: 'Test message for reply with accept',
             amount: 5.5,
             receiverId: 2
-          } })
+          }
+        })
         .then((res) => {
           const { body } = res;
           body.should.have.property('id').satisfy(Number.isInteger);
-          // body.should.have.property('authorId', 1);
           body.should.have.property('receiverId', 2);
           body.should.have.property('status', 'Closed');
           body.should.have.property('replyTo', 2);
@@ -125,7 +130,7 @@ describe('/deals', () => {
           body.should.have.property('deletedAt').to.be.null;
 
           return res.should.have.status(200);
-        })
+        });
     });
 
 
@@ -133,34 +138,38 @@ describe('/deals', () => {
       return chai.request(app)
         .post('/deals/reply')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
-        .send({ data: {
+        .send({
+          data: {
             dealId: 1,
-            action: "Accept",
-            message: "Test message for reply with accept",
+            action: 'Accept',
+            message: 'Test message for reply with accept',
             amount: 5.5,
             receiverId: 1
-          } })
+          }
+        })
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 400,
-            message: "Reply can only receiver"
+            message: 'Reply can only receiver'
           });
 
           return res.should.have.status(400);
-        })
+        });
     });
 
     it('should throw Error when try to reply to closed deal', () => {
       return chai.request(app)
         .post('/deals/reply')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJjbGFyay5rZW50QGV4YW1wbGUuY29tIiwiZmlyc3ROYW1lIjoiQ2xhcmsiLCJleHBpcmF0aW9uRGF0ZSI6MTU3MjY3ODQxODg5NywiaWF0IjoxNTM2Njc0ODE4fQ.hbT7AilTZU09QdSTXqdadfxod-YkM_Z6sTvyVuDhvY0')
-        .send({ data: {
+        .send({
+          data: {
             dealId: 1,
-            action: "Accept",
-            message: "Test message for reply with accept",
+            action: 'Accept',
+            message: 'Test message for reply with accept',
             amount: 5.5,
             receiverId: 1
-          } })
+          }
+        })
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 400,
@@ -168,20 +177,22 @@ describe('/deals', () => {
           });
 
           return res.should.have.status(400);
-        })
+        });
     });
 
     it('should throw Error when provided wrong deal id', () => {
       return chai.request(app)
         .post('/deals/reply')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJjbGFyay5rZW50QGV4YW1wbGUuY29tIiwiZmlyc3ROYW1lIjoiQ2xhcmsiLCJleHBpcmF0aW9uRGF0ZSI6MTU3MjY3ODQxODg5NywiaWF0IjoxNTM2Njc0ODE4fQ.hbT7AilTZU09QdSTXqdadfxod-YkM_Z6sTvyVuDhvY0')
-        .send({ data: {
+        .send({
+          data: {
             dealId: -1,
-            action: "Accept",
-            message: "Test message for reply with accept",
+            action: 'Accept',
+            message: 'Test message for reply with accept',
             amount: 5.5,
             receiverId: 1
-          } })
+          }
+        })
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 404,
@@ -189,21 +200,18 @@ describe('/deals', () => {
           });
 
           return res.should.have.status(404);
-        })
+        });
     });
-
   });
 
   context('/deals', () => {
-
     before(() => {
-      app = require('../../server');
       startTime = new Date();
       return destroyDeals().then(createDeals);
     });
 
 
-    it("should return correct deals objects", () => {
+    it('should return correct deals objects', () => {
       return chai.request(app)
         .get('/deals')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
@@ -222,10 +230,10 @@ describe('/deals', () => {
           (new Date(deal.createdAt)).should.gt(startTime);
 
           return res.should.have.status(200);
-        })
+        });
     });
 
-    it("should return correct single deal object", () => {
+    it('should return correct single deal object', () => {
       return chai.request(app)
         .get('/deals/1')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
@@ -252,10 +260,10 @@ describe('/deals', () => {
           (new Date(message.createdAt)).should.gt(startTime);
 
           return res.should.have.status(200);
-        })
+        });
     });
 
-    it("should throw Error when user try access to foreign deal", () => {
+    it('should throw Error when user try access to foreign deal', () => {
       return chai.request(app)
         .get('/deals/2')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
@@ -266,24 +274,24 @@ describe('/deals', () => {
           });
 
           return res.should.have.status(401);
-        })
+        });
     });
 
-    it("should throw Error when user try access to not exists deal", () => {
+    it('should throw Error when user try access to not exists deal', () => {
       return chai.request(app)
         .get('/deals/999999999')
         .set('Authorization', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJicnVjZS53YXluZUBleGFtcGxlLmNvbSIsImZpcnN0TmFtZSI6IkJydWNlIiwiZXhwaXJhdGlvbkRhdGUiOjE4OTY2NzQ4ODMyNjYsImlhdCI6MTUzNjY3MTI4M30.o0cUI1oGgTcI1v2TwPClKKGGPUcoGyrsIaC2NoE3VCU')
         .then((res) => {
           res.body.should.have.property('error').eql({
             status: 404,
-            message: "Deal not found"
+            message: 'Deal not found'
           });
 
           return res.should.have.status(404);
-        })
+        });
     });
 
-    it("should return correct detailed deals objects", () => {
+    it('should return correct detailed deals objects', () => {
       return chai.request(app)
         .get('/deals')
         .query({ detail: true })
@@ -313,10 +321,10 @@ describe('/deals', () => {
           (new Date(message.createdAt)).should.gt(startTime);
 
           return res.should.have.status(200);
-        })
+        });
     });
 
-    it("should throw Error when no deals exists", () => {
+    it('should throw Error when no deals exists', () => {
       return destroyDeals().then(() => {
         return chai.request(app)
           .get('/deals')
@@ -325,13 +333,12 @@ describe('/deals', () => {
           .then((res) => {
             res.body.should.have.property('error').eql({
               status: 404,
-              message: "No one deals are created"
+              message: 'No one deals are created'
             });
 
             return res.should.have.status(404);
           });
       });
-
     });
   });
-})
+});

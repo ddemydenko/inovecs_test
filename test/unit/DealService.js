@@ -14,7 +14,7 @@ describe('Deal Service', () => {
     let createDeal;
     let createMessage;
     let DealService;
-    const theme = "New Test Deal with unique number $2b$10$/g4gBdE.LxXfkaSq/JCQieRmyuoxyoVT0Kf3yrHzuGMfrZU9UFn3W";
+    const theme = 'New Test Deal with unique number $2b$10$/g4gBdE.LxXfkaSq/JCQieRmyuoxyoVT0Kf3yrHzuGMfrZU9UFn3W';
 
     before(() => {
       createDeal = sinon.spy(Deal, 'create');
@@ -29,15 +29,15 @@ describe('Deal Service', () => {
 
     it('methods create deal and create message should only call once', () => {
       const data = {
-        theme: theme,
-        message: "Just message for test",
+        theme,
+        message: 'Just message for test',
         amount: 10.5,
         receiverId: 2
       };
       const req = {
         authUser: { id: 1 },
         body: { data }
-      }
+      };
       return DealService.create(req)
         .then(() => {
           return Boolean(createDeal.should.have.been.calledOnce && createMessage.should.have.been.calledOnce);
