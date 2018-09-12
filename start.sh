@@ -1,5 +1,5 @@
 #!/bin/sh
 
 npm run migration
-
-npm run start
+sleep 2
+npm start

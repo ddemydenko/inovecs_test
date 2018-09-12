@@ -1,7 +1,6 @@
-FROM node:latest
-RUN mkdir /practice_docker
-ADD . /practice_docker
-WORKDIR /practice_docker
-RUN npm i
-EXPOSE 3000
-CMD ["npm", "start"]
+FROM node
+EXPOSE 3000 9229
+COPY . /home/app
+WORKDIR /home/app
+RUN npm install
+CMD ./start.sh

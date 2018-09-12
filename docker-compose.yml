@@ -1,20 +1,31 @@
-version: "2"
+version: '3'
 services:
-  practice_docker:
+  app:
     build: .
-    ports:
-    - 3000:3000
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; npm run migration; npm run start'
     depends_on:
-    - db
-    environment:
-    - DATABASE_URL=postgres://postgres:555666@db:5432/postgres
-    - PORT=5432
-  db:
-    image: postgres
+      - postgres
     ports:
-    - 5432:5432
+      - '3000:3000'
+      - '9229:9229'
+    links:
+    - "postgres"
+    - "postgres_test"
     environment:
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=555666
-    - POSTGRES_DB=postgres
+    - DATABASE_URL=postgres://postgres:555666@postgres:5432/postgres
+    - NODE_ENV=development_docker
+  postgres:
+    image: 'postgres:9.6.8-alpine'
+    environment:
+      POSTGRES_PASSWORD: 555666
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+    - '54321:5432'
+  postgres_test:
+    image: 'postgres:9.6.8-alpine'
+    environment:
+      POSTGRES_PASSWORD: 555666
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+    - "5000:5432"

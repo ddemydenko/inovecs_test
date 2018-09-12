@@ -1,8 +1,6 @@
-// return;
 const chai = require("chai");
 chai.should();
 chai.use(require('chai-http'));
-const baseURL = 'http://localhost:3000/';
 const { destroyUsers } = require('../helpers');
 
 describe('/users', () => {

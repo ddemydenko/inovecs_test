@@ -7,6 +7,13 @@
     "port": 5432,
     "dialect": "postgres"
   },
+  "development_docker": {
+    "use_env_variable": "DATABASE_URL"
+  },
+  "test_docker": {
+    "use_env_variable": "DATABASE_URL",
+    "logging": false
+  },
   "test": {
     "username": "postgres",
     "password": 555666,
